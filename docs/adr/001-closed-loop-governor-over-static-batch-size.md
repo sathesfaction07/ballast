@@ -17,7 +17,7 @@ The consequences of guessing are not symmetric:
 
 One of those is a lost afternoon and the other is a slow afternoon.
 
-`ImageCluster` in this portfolio already does the simple version: read available memory once at startup, pick a batch size from a ladder, and additionally halve it if usage later crosses 85%. That is genuinely useful and it covers the common case. What it does not do is recover — the batch size only ever goes down, so a transient spike permanently penalises the rest of the run. It also has no notion of disk or network, and no separation between "the machine is under pressure" and "this process has grown too fat".
+`Lookalike` in this portfolio already does the simple version: read available memory once at startup, pick a batch size from a ladder, and additionally halve it if usage later crosses 85%. That is genuinely useful and it covers the common case. What it does not do is recover — the batch size only ever goes down, so a transient spike permanently penalises the rest of the run. It also has no notion of disk or network, and no separation between "the machine is under pressure" and "this process has grown too fat".
 
 ## Decision
 

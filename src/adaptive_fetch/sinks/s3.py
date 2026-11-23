@@ -8,7 +8,7 @@ from .base import Sink
 class S3Sink(Sink):
     name = "s3"
 
-    def __init__(self, bucket: str, prefix: str = "adaptive-fetch", region: str = "us-east-1"):
+    def __init__(self, bucket: str, prefix: str = "ballast", region: str = "us-east-1"):
         self.bucket = bucket
         self.prefix = prefix.strip("/")
         self.region = region

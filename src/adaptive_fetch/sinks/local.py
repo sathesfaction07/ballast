@@ -58,7 +58,7 @@ class LocalSink(Sink):
             from openpyxl.styles import Font
         except ImportError as exc:
             raise RuntimeError(
-                "excel output needs openpyxl. Install with: pip install 'adaptive-fetch[excel]'"
+                "excel output needs openpyxl. Install with: pip install 'ballast[excel]'"
             ) from exc
 
         header, rows = _rows(records)

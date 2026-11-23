@@ -98,7 +98,7 @@ from adaptive_fetch.core.fetcher import Fetcher
 from adaptive_fetch.core.resources import ResourceSnapshot
 from adaptive_fetch.sinks import get_sink
 
-work = Path(tempfile.mkdtemp(prefix="adaptive-fetch-verify-"))
+work = Path(tempfile.mkdtemp(prefix="ballast-verify-"))
 try:
     ids = work / "in.csv"
     ids.write_text("id\n" + "\n".join(f"V-{i:03d}" for i in range(12)) + "\n")
@@ -162,9 +162,9 @@ Setup complete.
 
   source .venv/bin/activate
 
-  adaptive-fetch probe                        # what does this machine look like right now
-  adaptive-fetch plan data/sample_input.csv   # sizing chosen for this workload
-  adaptive-fetch run data/sample_input.csv --base-url https://api.example.com
+  ballast probe                        # what does this machine look like right now
+  ballast plan data/sample_input.csv   # sizing chosen for this workload
+  ballast run data/sample_input.csv --base-url https://api.example.com
 
 Governor decisions log at WARNING, so they show by default.
 DONE

@@ -1,4 +1,4 @@
-# AdaptiveFetch
+# Ballast
 
 A batch fetcher that watches its own resource usage and re-tunes itself while it runs. It reads a list of record IDs, pulls each one over HTTP, and adjusts batch size, concurrency and payload size in response to memory pressure, disk space and network latency. Progress is checkpointed, so an interrupted run resumes where it stopped. Results go to local files or to S3.
 
@@ -47,7 +47,7 @@ Process memory is watched separately from system memory. When RSS crosses a thre
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                     CLI (adaptive-fetch)                          │
+│                     CLI (ballast)                          │
 │                                                                  │
 │    run              probe                 plan                   │
 │    fetch a list     show current          show sizing for        │
@@ -115,7 +115,7 @@ Process memory is watched separately from system memory. When RSS crosses a thre
 ## Project Structure
 
 ```
-adaptive-fetch/
+ballast/
 ├── src/adaptive_fetch/
 │   ├── cli.py                 run / probe / plan
 │   ├── config.py              Pydantic Settings, AF_ prefix
@@ -146,26 +146,26 @@ bash setup.sh
 source .venv/bin/activate
 
 # See what the machine looks like right now and what the governor would do
-adaptive-fetch probe
+ballast probe
 
 # See the sizing chosen for a specific workload
-adaptive-fetch plan data/sample_input.csv
+ballast plan data/sample_input.csv
 
 # Fetch
-adaptive-fetch run data/sample_input.csv --base-url https://api.example.com
+ballast run data/sample_input.csv --base-url https://api.example.com
 
 # Pin the batch size instead of auto-sizing
-adaptive-fetch run data/sample_input.csv --batch-size 64
+ballast run data/sample_input.csv --batch-size 64
 
 # Excel output
-adaptive-fetch run data/sample_input.csv --format excel
+ballast run data/sample_input.csv --format excel
 
 # Upload results to S3 instead of writing locally
-adaptive-fetch run data/sample_input.csv --sink s3 --s3-bucket my-results-bucket
+ballast run data/sample_input.csv --sink s3 --s3-bucket my-results-bucket
 
 # Resume is on by default. Re-run the same command after an interruption.
 # To reprocess everything from scratch:
-adaptive-fetch run data/sample_input.csv --no-resume
+ballast run data/sample_input.csv --no-resume
 ```
 
 ---
@@ -185,7 +185,7 @@ Fetches every ID in the input file. Accepts CSV (looks for an `id`, `record_id` 
 | `--batch-size` | auto | Omit to size from available memory |
 | `--concurrent` | 8 | Max simultaneous requests |
 | `--s3-bucket` | — | Required when `--sink s3` |
-| `--s3-prefix` | `adaptive-fetch` | Key prefix; a UTC timestamp is appended |
+| `--s3-prefix` | `ballast` | Key prefix; a UTC timestamp is appended |
 | `--resume/--no-resume` | resume | Skip IDs already in the checkpoint |
 | `--log-level` | `INFO` | Governor decisions log at WARNING |
 
@@ -270,7 +270,7 @@ CLI flags override environment variables for the options that expose both.
 
 **Recycling thresholds scale with workload, which came from the original tool.** The internal version this is based on tracked browser memory and restarted the browser on a sliding scale — roughly 2000MB for tiny jobs, down to 800MB for jobs over 300 items. I kept that shape for the HTTP client. It looks arbitrary and it half is, but the reasoning holds: recycling costs a connection re-establishment, and on a 5-item job you will never recycle enough times for accumulated state to matter, while on a 5,000-item job you want it to happen often and early.
 
-**I built this over HTTP rather than a browser, which is a deliberate departure.** The tool this is modelled on drove a browser, and browser memory growth is the textbook motivation for recycling. But BatchValidator in this portfolio already covers Playwright automation, and repeating it would teach nothing new. Over HTTP the governor is the whole point, it is far easier to test, and the pattern transfers to any batch workload. The cost is that memory growth is less dramatic than it would be with a browser, so the adaptive behaviour is less visceral in a demo — which is exactly why `probe` exists.
+**I built this over HTTP rather than a browser, which is a deliberate departure.** The tool this is modelled on drove a browser, and browser memory growth is the textbook motivation for recycling. But Twinlane in this portfolio already covers Playwright automation, and repeating it would teach nothing new. Over HTTP the governor is the whole point, it is far easier to test, and the pattern transfers to any batch workload. The cost is that memory growth is less dramatic than it would be with a browser, so the adaptive behaviour is less visceral in a demo — which is exactly why `probe` exists.
 
 **Records are held in memory until the end.** The checkpoint accumulates every result and the sink writes once. For a tool whose entire premise is memory awareness, that is an uncomfortable irony, and at a few hundred thousand records it becomes the binding constraint. Streaming results to disk as they complete would fix it. I did not do it because the current shape lets a sink write one well-formed document with a summary block, and streaming would mean either an append-only format or a rewrite of the sink interface. Worth doing before this ever runs at that scale.
 

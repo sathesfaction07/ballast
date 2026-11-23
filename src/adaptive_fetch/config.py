@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     sink: str = "local"
     output_format: str = "json"
     s3_bucket: str = ""
-    s3_prefix: str = "adaptive-fetch"
+    s3_prefix: str = "ballast"
     aws_region: str = "us-east-1"
 
     log_level: str = "INFO"

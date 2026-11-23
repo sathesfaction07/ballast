@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "adaptive-fetch"
+name = "ballast"
 version = "1.0.0"
 description = "Resource-governed batch fetcher that re-tunes itself mid-run under memory, disk and network pressure"
 readme = "README.md"
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-adaptive-fetch = "adaptive_fetch.cli:main"
+ballast = "adaptive_fetch.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/adaptive_fetch"]

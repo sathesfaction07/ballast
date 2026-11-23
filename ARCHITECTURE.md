@@ -1,8 +1,8 @@
-# AdaptiveFetch — Technical Architecture
+# Ballast — Technical Architecture
 
 ## Overview
 
-AdaptiveFetch is a batch HTTP fetcher that samples its own resource usage before every batch and re-tunes itself in response. Memory pressure resizes the batch, latency switches payload size and concurrency, process RSS triggers HTTP client recycling, and low disk halts the run cleanly with resumable state. Progress checkpoints incrementally; results go to local files (JSON/CSV/Excel) or S3.
+Ballast is a batch HTTP fetcher that samples its own resource usage before every batch and re-tunes itself in response. Memory pressure resizes the batch, latency switches payload size and concurrency, process RSS triggers HTTP client recycling, and low disk halts the run cleanly with resumable state. Progress checkpoints incrementally; results go to local files (JSON/CSV/Excel) or S3.
 
 **Design principle:** The batch size is an output, not an input. A constant chosen before the run cannot track memory, response size or link quality — all of which move during the run. So the tool measures itself and decides, rather than following a plan made in advance.
 
@@ -12,7 +12,7 @@ AdaptiveFetch is a batch HTTP fetcher that samples its own resource usage before
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        CLI (adaptive-fetch)                               │
+│                        CLI (ballast)                               │
 │                                                                         │
 │  ┌──────────────┐   ┌──────────────────┐   ┌────────────────────────┐  │
 │  │   run        │   │   probe          │   │   plan                 │  │
@@ -109,7 +109,7 @@ AdaptiveFetch is a batch HTTP fetcher that samples its own resource usage before
 
 ### 1. CLI (`src/adaptive_fetch/cli.py`)
 
-Three Click commands. Entry point `adaptive-fetch`.
+Three Click commands. Entry point `ballast`.
 
 | Command | Purpose |
 |:--|:--|
@@ -197,7 +197,7 @@ Holds `completed: set[str]`, `records: list[dict]`, `halted_reason: str | None`.
 ## Data Flow
 
 ```
-1.  adaptive-fetch run data/records.csv --base-url https://api.example.com --format csv
+1.  ballast run data/records.csv --base-url https://api.example.com --format csv
 2.  CLI drops None overrides, builds Settings, quiets httpx logging
 3.  get_sink("local", cfg) -> LocalSink; is_available() -> True
 4.  Fetcher.run() starts. load_ids() reads 60 IDs from the id column
@@ -320,7 +320,7 @@ class Settings(BaseSettings):
     sink: str = "local"
     output_format: str = "json"
     s3_bucket: str = ""
-    s3_prefix: str = "adaptive-fetch"
+    s3_prefix: str = "ballast"
     aws_region: str = "us-east-1"
 
     log_level: str = "INFO"
@@ -340,24 +340,24 @@ bash setup.sh --all
 source .venv/bin/activate
 
 # What does this machine look like, and what would the governor do about it
-adaptive-fetch probe
-adaptive-fetch probe --probe-url https://api.example.com
+ballast probe
+ballast probe --probe-url https://api.example.com
 
 # Sizing for a specific workload, without fetching
-adaptive-fetch plan data/sample_input.csv
+ballast plan data/sample_input.csv
 
 # Fetch
-adaptive-fetch run data/sample_input.csv --base-url https://api.example.com
+ballast run data/sample_input.csv --base-url https://api.example.com
 
 # Pin the batch size, override concurrency
-adaptive-fetch run data/sample_input.csv --batch-size 64 --concurrent 4
+ballast run data/sample_input.csv --batch-size 64 --concurrent 4
 
 # Excel out, or straight to S3
-adaptive-fetch run data/sample_input.csv --format excel
-adaptive-fetch run data/sample_input.csv --sink s3 --s3-bucket my-results-bucket
+ballast run data/sample_input.csv --format excel
+ballast run data/sample_input.csv --sink s3 --s3-bucket my-results-bucket
 
 # Resume is the default. Re-run the same command after an interruption.
-adaptive-fetch run data/sample_input.csv --no-resume    # start over instead
+ballast run data/sample_input.csv --no-resume    # start over instead
 ```
 
 ---

@@ -18,7 +18,7 @@ class Checkpoint:
         if not self.path.exists():
             return
         try:
-            state = json.loads(self.path.read_text())
+            state = json.loads(self.path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             return
         self.completed = set(state.get("completed", []))
@@ -46,6 +46,6 @@ class Checkpoint:
             "halted_reason": self.halted_reason,
         }
         tmp = self.path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(payload, indent=2, default=str))
+        tmp.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
         tmp.replace(self.path)
         self._since_save = 0

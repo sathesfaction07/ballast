@@ -32,7 +32,7 @@ class LocalSink(Sink):
             target = self.output_path / "results.json"
             target.write_text(
                 json.dumps({"summary": summary, "records": records}, indent=2, default=str)
-            )
+, encoding="utf-8")
             written.append(str(target))
         elif self.output_format == "csv":
             target = self.output_path / "results.csv"
@@ -48,7 +48,7 @@ class LocalSink(Sink):
             raise ValueError(f"unknown output format: {self.output_format}")
 
         summary_path = self.output_path / "summary.json"
-        summary_path.write_text(json.dumps(summary, indent=2, default=str))
+        summary_path.write_text(json.dumps(summary, indent=2, default=str), encoding="utf-8")
         written.append(str(summary_path))
         return written
 

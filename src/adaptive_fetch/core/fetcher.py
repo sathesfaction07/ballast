@@ -60,7 +60,7 @@ def load_ids(path: Path) -> list[str]:
             )
             return [row[key].strip() for row in reader if row.get(key, "").strip()]
 
-    return [line.strip() for line in path.read_text().splitlines() if line.strip()]
+    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def limits_from_settings(cfg: Settings) -> GovernorLimits:
